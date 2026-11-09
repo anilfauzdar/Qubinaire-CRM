@@ -1,0 +1,56 @@
+{
+  "product": "Qubinaire CRM Integrated Build (WhatsApp excluded)",
+  "included": [
+    "V2-V14 historical source archives",
+    "Central FastAPI/PostgreSQL API and Flask portal",
+    "Admin employee/team management and device revocation API",
+    "Flutter Android/Windows shared client source",
+    "User-bound device registration and secure token storage",
+    "Exa public-web AI Lead Hunter with source URL deduplication and reviewed import",
+    "Optional scheduled Lead Hunter Docker worker",
+    "Android APK and Windows installer build scripts plus GitHub Actions workflow",
+    "PowerShell live smoke test, Playwright browser test, static security audit checklist",
+    "k6 staged 5000-VU load-test script",
+    "PostgreSQL backup, restore and migration scripts",
+    "V2-V14 historical archives and deployment documentation",
+    "Per-user SQLite cache/outbox for leads and all 12 writable core CRM modules",
+    "Read-only employee directory cache; offline snapshot/bootstrap for all cached modules",
+    "Automatic foreground sync every 30 seconds, connectivity-restoration and resume sync",
+    "Server role/record-scoped snapshots and event pull, idempotency, optimistic base-snapshot conflict checks",
+    "Offline-created numeric IDs mapped to server IDs, including dependent foreign-key resolution within sync batches",
+    "PostgreSQL advisory transaction lock for monotonic event sequence commit order",
+    "GitHub Actions build instructions for retrieving Android APK and Windows installer artifacts"
+  ],
+  "implemented_scope_limits": [
+    "Offline deletes and attachments are disabled; employee/user administration remains online-only",
+    "Generic module create/edit screen uses JSON fields and needs production UX refinement",
+    "Background sync while Android app is force-closed is not implemented; sync runs while app is open and on resume/connectivity restore",
+    "Local SQLite is not SQLCipher-encrypted; TLS/VPN, OS device encryption and independent security review remain release gates",
+    "Lead Hunter only uses public-web results and creates review_required records; no private phone scraping or outbound messaging",
+    "WhatsApp integration intentionally excluded"
+  ],
+  "not_claimed": [
+    "production readiness",
+    "built APK or signed Android package",
+    "built Windows installer/EXE",
+    "completed live database/browser end-to-end tests",
+    "independent security audit or penetration test",
+    "validated 5000 concurrent-user capacity"
+  ],
+  "verification_in_this_environment": [
+    "Python compilation for server and portal",
+    "Jinja parsing for all portal templates",
+    "Docker Compose and GitHub Actions YAML parsing",
+    "Sync contract check: all 12 writable modules and users read-only are wired to local cache/sync",
+    "Limited static security checks",
+    "ZIP integrity after packaging"
+  ],
+  "not_run_due_to_environment": [
+    "Flutter analyze/Android APK build/Windows installer build: Flutter SDK unavailable",
+    "Docker/PostgreSQL integration and live multi-device conflict tests: Docker/PostgreSQL unavailable",
+    "Playwright browser run",
+    "k6 5000-VU load run",
+    "Independent security audit/penetration test"
+  ],
+  "version_policy": "single consolidated package; avoid repeated feature ZIP versioning"
+}

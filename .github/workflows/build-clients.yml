@@ -1,0 +1,68 @@
+name: Build Qubinaire Android and Windows clients
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'clients/flutter/**'
+      - '.github/workflows/build-clients.yml'
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Generate Android project
+        working-directory: clients/flutter
+        run: flutter create --org com.qubinaire --platforms=android .
+      - name: Ensure Internet permission
+        working-directory: clients/flutter
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android/app/src/main/AndroidManifest.xml')
+          s=p.read_text()
+          permission='<uses-permission android:name="android.permission.INTERNET"/>'
+          if permission not in s: s=s.replace('<application', permission+'\\n    <application',1)
+          p.write_text(s)
+          PY
+      - run: flutter pub get
+        working-directory: clients/flutter
+      - run: flutter analyze
+        working-directory: clients/flutter
+        continue-on-error: true
+      - run: flutter build apk --release
+        working-directory: clients/flutter
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qubinaire-android-apk
+          path: clients/flutter/build/app/outputs/flutter-apk/app-release.apk
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Generate Windows project
+        working-directory: clients/flutter
+        run: flutter create --org com.qubinaire --platforms=windows .
+      - run: flutter pub get
+        working-directory: clients/flutter
+      - run: flutter build windows --release
+        working-directory: clients/flutter
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress -y
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          & "C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe" "installer\\QubinaireCRM.iss"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qubinaire-windows-installer
+          path: clients/flutter/build/windows/installer/QubinaireCRM-Setup.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qubinaire-windows-app-folder
+          path: clients/flutter/build/windows/x64/runner/Release/**

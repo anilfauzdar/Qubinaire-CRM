@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block content %}
+<h1>Attendance</h1><section class="panel"><h2>आज की Attendance · {{today}}</h2>
+{% if not mine %}<form method="post"><input type="hidden" name="action" value="in"><label>Note (optional)</label><input name="note" placeholder="Office / work note"><button>Check In</button></form>
+{% elif not mine.check_out %}<p>Check-in: {{mine.check_in}}</p><form method="post"><input type="hidden" name="action" value="out"><button>Check Out</button></form>
+{% else %}<p>Check-in: {{mine.check_in}}</p><p>Check-out: {{mine.check_out}}</p><b>आज की attendance complete है।</b>{% endif %}</section>
+<section class="panel"><h2>Attendance History</h2><div class="table-wrap"><table><tr><th>Employee</th><th>Date</th><th>Check-in</th><th>Check-out</th><th>Note</th></tr>{% for r in rows %}<tr><td>{{r.full_name}}</td><td>{{r.work_date}}</td><td>{{r.check_in}}</td><td>{{r.check_out or '—'}}</td><td>{{r.note or ''}}</td></tr>{% else %}<tr><td colspan="5">No attendance entries</td></tr>{% endfor %}</table></div></section>{% endblock %}

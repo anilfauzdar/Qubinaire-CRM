@@ -1,0 +1,36 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Local databases, backups and logs
+data/
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.backup
+backups/
+*.log
+
+# Flutter / desktop / Android build outputs
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+.dart_tool/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

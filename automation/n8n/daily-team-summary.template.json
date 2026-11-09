@@ -1,0 +1,86 @@
+{
+  "name": "Qubinaire CRM - Daily Team Summary (template)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 19 * * 1-6"
+            }
+          ]
+        }
+      },
+      "id": "schedule",
+      "name": "Every day 7 PM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.QUBINAIRE_API_URL + '/v1/dashboard/summary'}}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "id": "api",
+      "name": "Fetch CRM summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d=$input.first().json; return [{json:{message:`Qubinaire daily summary\\nLeads: ${d.leads}\\nAdmissions: ${d.admissions}\\nCollections: \u20b9${d.collections}\\nPending follow-ups: ${d.pending_followups}`}}];"
+      },
+      "id": "format",
+      "name": "Format summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Every day 7 PM": {
+      "main": [
+        [
+          {
+            "node": "Fetch CRM summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch CRM summary": {
+      "main": [
+        [
+          {
+            "node": "Format summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "template",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

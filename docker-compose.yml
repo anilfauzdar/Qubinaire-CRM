@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_DB: qubinaire
+      POSTGRES_USER: qubinaire
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qubinaire -d qubinaire"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  api:
+    build: ./server
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+psycopg://qubinaire:${POSTGRES_PASSWORD}@db:5432/qubinaire
+      EXA_API_KEY: ${EXA_API_KEY:-}
+      WEB_CONCURRENCY: "4"
+    ports:
+      - "${CRM_BIND_ADDRESS:-127.0.0.1}:8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+  portal:
+    build: ./portal
+    restart: unless-stopped
+    environment:
+      CRM_API_URL: http://api:8080
+      PORTAL_SECRET: ${PORTAL_SECRET:?Set PORTAL_SECRET in .env}
+      COOKIE_SECURE: "0"
+    ports:
+      - "${CRM_BIND_ADDRESS:-127.0.0.1}:5001:5001"
+    depends_on:
+      - api
+  lead-hunter-worker:
+    profiles: ["lead-hunter"]
+    build: ./server
+    restart: unless-stopped
+    command: ["python","lead_hunter_worker.py"]
+    environment:
+      CRM_API_URL: http://api:8080
+      LEAD_HUNTER_USERNAME: ${LEAD_HUNTER_USERNAME:-}
+      LEAD_HUNTER_PASSWORD: ${LEAD_HUNTER_PASSWORD:-}
+      LEAD_HUNTER_QUERIES: ${LEAD_HUNTER_QUERIES:-}
+      LEAD_HUNTER_INTERVAL_SECONDS: ${LEAD_HUNTER_INTERVAL_SECONDS:-21600}
+      LEAD_HUNTER_NUM_RESULTS: ${LEAD_HUNTER_NUM_RESULTS:-20}
+    depends_on:
+      - api
+volumes:
+  pgdata:
